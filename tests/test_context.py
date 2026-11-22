@@ -7,7 +7,7 @@ from dataclasses import FrozenInstanceError, asdict, replace
 from datetime import datetime, timedelta, timezone
 from types import MappingProxyType
 
-from eventflow.context import EventEnvelope, correlation_context, current_correlation_id
+from flowevent.context import EventEnvelope, correlation_context, current_correlation_id
 
 
 class ContextTests(unittest.TestCase):

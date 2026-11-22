@@ -11,9 +11,9 @@ class BenchmarkSourceTests(unittest.TestCase):
             "pyproject.toml",
             "benchmarks/_support.py",
             "benchmarks/benchmark_publish.py",
-            "eventflow/_core.c",
-            "eventflow/_core.pyi",
-            "eventflow/py.typed",
+            "flowevent/_core.c",
+            "flowevent/_core.pyi",
+            "flowevent/py.typed",
         ):
             with self.subTest(path=path):
                 self.assertTrue(_is_source_path(path))

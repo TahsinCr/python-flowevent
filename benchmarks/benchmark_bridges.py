@@ -1,4 +1,4 @@
-"""Benchmark same-thread and cross-thread delivery to an asyncio consumer."""
+"""Benchmark event queue roundtrips and direct await."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ from threading import Event as ThreadEvent
 from threading import Thread
 from time import perf_counter
 
-from eventflow import EventBus
-from eventflow.bridges import AsyncEventQueue, LoopPortal
-from eventflow.errors import EventQueueClosedError
+from flowevent import EventBus
+from flowevent.bridges import AsyncEventQueue
+from flowevent.errors import EventQueueClosedError
 
-from ._runner import bench_async, bench_sync, bench_time_func, create_runner
+from ._runner import bench_async, bench_time_func, create_runner
 
 
 async def _noop() -> None:
@@ -70,7 +70,7 @@ async def _queue_roundtrip_batch(loops: int, *, cross_thread: bool) -> float:
 
                 producer = Thread(
                     target=publish_from_thread,
-                    name="EventFlowBridgeBenchmark",
+                    name="FlowEventBridgeBenchmark",
                     daemon=True,
                 )
                 producer.start()
@@ -97,13 +97,6 @@ def main() -> None:
     runner.parse_args()
 
     bench_async(runner, "async-direct-await", _noop)
-
-    with LoopPortal() as portal:
-        bench_sync(
-            runner,
-            "loop-portal-roundtrip",
-            lambda: portal.call(_noop, timeout=10),
-        )
 
     for cross_thread, name in (
         (False, "same-thread-waiting-consumer-roundtrip"),

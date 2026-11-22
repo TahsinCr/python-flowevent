@@ -10,8 +10,8 @@ import unittest
 from importlib import import_module
 from pathlib import Path
 
-import eventflow
-from eventflow import (
+import flowevent
+from flowevent import (
     AsyncEventBus,
     AsyncEventEngine,
     CallbackSubscription,
@@ -21,10 +21,6 @@ from eventflow import (
     Subscription,
 )
 
-_MODULE_ONLY_EXPORTS = {
-    ".observability": {"ExecutionStatus", "ObservationKind"},
-}
-
 
 class PublicContractTests(unittest.TestCase):
     def test_enum_values_match_current_configuration_strings(self):
@@ -33,15 +29,12 @@ class PublicContractTests(unittest.TestCase):
         self.assertIs(DeliveryMode("sequential"), DeliveryMode.SEQUENTIAL)
         self.assertIs(DeliveryMode("concurrent"), DeliveryMode.CONCURRENT)
 
-    def test_readme_examples_before_integrated_section_execute(self):
+    def test_readme_examples_execute(self):
         root = Path(__file__).resolve().parents[1]
         for name in ("README.md", "README-TR.md"):
-            content = (
-                (root / name)
-                .read_text(encoding="utf-8")
-                .split("<!-- integrated execution documentation -->")[0]
-            )
+            content = (root / name).read_text(encoding="utf-8")
             blocks = re.findall(r"~~~python\n(.*?)~~~", content, re.S)
+            self.assertTrue(blocks, name)
             for index, block in enumerate(blocks):
                 with self.subTest(readme=name, block=index):
                     subprocess.run(
@@ -52,15 +45,15 @@ class PublicContractTests(unittest.TestCase):
                         timeout=20,
                     )
 
-    def test_reviewed_public_apis_match_the_v1_4_0_contract(self):
+    def test_reviewed_public_apis_match_the_contract(self):
         contract = json.loads(
-            Path(__file__).with_name("api_v1_4_0.json").read_text(encoding="utf-8")
+            Path(__file__).with_name("api_contract.json").read_text(encoding="utf-8")
         )
         for name in contract["exports"]:
-            self.assertIn(name, eventflow.__all__)
-            self.assertIsNotNone(getattr(eventflow, name))
+            self.assertIn(name, flowevent.__all__)
+            self.assertIsNotNone(getattr(flowevent, name))
         for name, definition in contract["signatures"].items():
-            item = getattr(eventflow, name)
+            item = getattr(flowevent, name)
             if "$call" in definition:
                 self.assertEqual(str(inspect.signature(item)), definition["$call"], name)
             for method, signature in definition["methods"].items():
@@ -71,11 +64,11 @@ class PublicContractTests(unittest.TestCase):
                 )
 
     def test_public_exports_match_the_lazy_module_inventory(self):
-        exports = eventflow.__all__
-        optional_exports = eventflow._OPTIONAL_EXPORTS
+        exports = flowevent.__all__
+        optional_exports = flowevent._OPTIONAL_EXPORTS
 
         self.assertEqual(len(exports), len(set(exports)))
-        self.assertTrue(set(exports).issubset(dir(eventflow)))
+        self.assertTrue(set(exports).issubset(dir(flowevent)))
         self.assertTrue(set(optional_exports).issubset(exports))
 
         module_exports = {}
@@ -83,25 +76,21 @@ class PublicContractTests(unittest.TestCase):
         for name, module_name in optional_exports.items():
             module = module_exports.get(module_name)
             if module is None:
-                module = import_module(module_name, eventflow.__name__)
+                module = import_module(module_name, flowevent.__name__)
                 module_exports[module_name] = module
             exports_by_module.setdefault(module_name, set()).add(name)
 
         for module_name, module in module_exports.items():
             module_public_exports = set(getattr(module, "__all__", ()))
             mapped_exports = exports_by_module[module_name]
-            module_only_exports = _MODULE_ONLY_EXPORTS.get(module_name, set())
-            self.assertTrue(module_only_exports.issubset(module_public_exports), module_name)
             self.assertEqual(
                 module_public_exports,
-                mapped_exports | module_only_exports,
+                mapped_exports,
                 f"Review package exports for {module_name}",
             )
 
-        self.assertTrue(set(_MODULE_ONLY_EXPORTS).issubset(module_exports))
-
         for name in exports:
-            self.assertIsNotNone(getattr(eventflow, name), name)
+            self.assertIsNotNone(getattr(flowevent, name), name)
 
     def test_async_delivery_limit_is_keyword_only_and_opt_in(self):
         for item in (AsyncEventBus, AsyncEventEngine):

@@ -27,11 +27,3 @@ class EventQueueClosedError(EventBusError):
 
 class QueueOverflowError(EventBusError):
     """Raised when an event queue configured with overflow='error' is full."""
-
-
-class LoopPortalClosedError(RuntimeError):
-    """Raised when submitting work to a stopped LoopPortal."""
-
-
-class CircuitOpenError(RuntimeError):
-    """Raised when a circuit breaker rejects a call while open or saturated."""

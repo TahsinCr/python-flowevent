@@ -1,1 +1,1 @@
-"""Standalone development benchmarks for EventFlow."""
+"""Standalone development benchmarks for FlowEvent."""

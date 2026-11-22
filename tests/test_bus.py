@@ -17,7 +17,7 @@ from weakref import ref
 
 from _support import _FailingAppendHistory, _FailingQueryHistory, _RecordingQueryHistory
 
-from eventflow import (
+from flowevent import (
     AsyncEventBus,
     AsyncEventBusActions,
     BaseEventBus,
@@ -36,7 +36,7 @@ from eventflow import (
     correlation_context,
     current_correlation_id,
 )
-from eventflow._compatibility import ExceptionGroup
+from flowevent._compatibility import ExceptionGroup
 
 
 class EventBusTests(unittest.TestCase):
@@ -577,7 +577,7 @@ class EventBusTests(unittest.TestCase):
         self.assertFalse(subscriber.is_alive())
 
     def test_close_reports_a_stuck_periodic_schedule(self) -> None:
-        from eventflow import EventShutdownTimeoutError
+        from flowevent import EventShutdownTimeoutError
 
         entered = threading.Event()
         release = threading.Event()
@@ -778,7 +778,7 @@ class EventBusTests(unittest.TestCase):
         self.assertFalse(closer.is_alive())
 
     def test_cancelled_periodic_thread_stays_owned_until_it_exits(self) -> None:
-        from eventflow import EventShutdownTimeoutError
+        from flowevent import EventShutdownTimeoutError
 
         entered = threading.Event()
         release = threading.Event()
@@ -1126,7 +1126,7 @@ class EventBusTests(unittest.TestCase):
 
         try:
             with patch(
-                "eventflow.event_bus.threading.Thread",
+                "flowevent.event_bus.threading.Thread",
                 side_effect=close_before_thread_start,
             ):
                 with self.assertRaises(EventBusClosedError):

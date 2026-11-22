@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "flowevent"
 version = "1.4.2"
-description = "EventFlow: in-process event delivery, pipelines, and coordination primitives for Python."
+description = "FlowEvent: in-process event delivery for Python."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = "MIT"
@@ -35,10 +35,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TahsinCr/python-eventflow"
-Repository = "https://github.com/TahsinCr/python-eventflow"
-Changelog = "https://github.com/TahsinCr/python-eventflow/blob/main/CHANGELOG.md"
-Issues = "https://github.com/TahsinCr/python-eventflow/issues"
+Homepage = "https://github.com/TahsinCr/python-flowevent"
+Repository = "https://github.com/TahsinCr/python-flowevent"
+Changelog = "https://github.com/TahsinCr/python-flowevent/blob/main/CHANGELOG.md"
+Issues = "https://github.com/TahsinCr/python-flowevent/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -46,23 +46,18 @@ dev = [
   "pyperf>=2.7,<3",
   "pyright>=1.1.400,<2",
   "ruff>=0.12,<1",
+  "setuptools>=77",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["eventflow*"]
+include = ["flowevent", "flowevent.*"]
 
 [tool.setuptools.package-data]
-eventflow = ["py.typed", "_core.pyi"]
+flowevent = ["py.typed", "_core.pyi"]
 
 [tool.setuptools.exclude-package-data]
-eventflow = ["*.c"]
-
-[tool.cibuildwheel]
-test-requires = ["hypothesis>=6,<7"]
-build-verbosity = 1
-skip = ["pp*", "*-manylinux_i686", "*-musllinux_i686", "*-win32"]
-test-command = "python -c \"import pathlib, sys, sysconfig, unittest, eventflow, eventflow._native as n; assert n.CORE is not None; assert not sysconfig.get_config_var('Py_GIL_DISABLED') or not sys._is_gil_enabled(); assert not pathlib.Path(eventflow.__file__).resolve().is_relative_to(pathlib.Path(r'{project}').resolve()); sys.path.extend([r'{project}', r'{project}/tests']); res = unittest.TextTestRunner().run(unittest.defaultTestLoader.discover(r'{project}/tests')); sys.exit(0 if res.wasSuccessful() else 1)\""
+flowevent = ["*.c"]
 
 [tool.ruff]
 target-version = "py310"
@@ -78,5 +73,13 @@ select = ["E4", "E7", "E9", "F", "B", "ASYNC", "I", "UP", "RUF100"]
 [tool.pyright]
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
-include = ["eventflow"]
+include = ["flowevent"]
 exclude = ["tests"]
+
+[tool.cibuildwheel]
+build-verbosity = 1
+skip = ["pp*", "*-manylinux_i686", "*-musllinux_i686", "*-win32"]
+test-command = [
+  "python -c \"import sys, sysconfig; from flowevent._native import CORE; assert CORE is not None; assert not sysconfig.get_config_var('Py_GIL_DISABLED') or not sys._is_gil_enabled()\"",
+  "python -m unittest discover -s \"{project}/tests\" -p test_native_core.py",
+]

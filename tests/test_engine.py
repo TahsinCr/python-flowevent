@@ -8,14 +8,14 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from unittest.mock import patch
 from weakref import ref
 
-from eventflow import (
+from flowevent import (
     AsyncEventBus,
     AsyncEventEngine,
     EventBus,
     EventBusClosedError,
     EventEngine,
 )
-from eventflow._compatibility import ExceptionGroup
+from flowevent._compatibility import ExceptionGroup
 
 
 class EventEngineTests(unittest.TestCase):

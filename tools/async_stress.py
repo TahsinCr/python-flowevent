@@ -14,13 +14,8 @@ SCENARIOS = (
     "test_async_bus.AsyncEventBusTests.test_async_wait_for_cleanup_when_clear_or_close_races_with_cancellation",
     "test_async_bus.AsyncEventBusTests.test_async_live_publish_waits_behind_subscription_replay",
     "test_async_bus.AsyncEventBusTests.test_cancelled_periodic_task_stays_owned_until_it_exits",
-    "test_async_primitives.AsyncPrimitiveTests.test_single_flight_shares_work_without_coupling_waiter_cancellation",
-    "test_async_primitives.AsyncPrimitiveTests.test_keyed_rate_limiter_waits_cancellably_and_cleans_waiters",
-    "test_async_primitives.AsyncPrimitiveTests.test_circuit_breaker_ignores_stale_half_open_probe_results",
-    "test_bridges.AsyncCoordinationEdgeTests.test_event_queue_recovers_when_publish_races_with_waiter_cancellation",
-    "test_bridges.AsyncCoordinationEdgeTests.test_event_queue_wakes_waiter_from_publisher_thread",
-    "test_stream.StreamTests.test_repeated_cancel_waits_for_producer_cleanup",
-    "test_async_primitives.AsyncPrimitiveTests.test_async_stream_batch_within_flushes_by_time_and_preserves_final_partial",
+    "test_bridges.EventQueueBridgeTests.test_event_queue_recovers_when_publish_races_with_waiter_cancellation",
+    "test_bridges.EventQueueBridgeTests.test_event_queue_wakes_waiter_from_publisher_thread",
 )
 
 
@@ -51,7 +46,7 @@ def main() -> int:
     sys.path.insert(0, str(ROOT))
     sys.path.insert(0, str(TESTS))
 
-    from eventflow import _native
+    from flowevent import _native
 
     loader = unittest.defaultTestLoader
     suite = unittest.TestSuite()

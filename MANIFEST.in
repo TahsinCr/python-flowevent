@@ -1,10 +1,9 @@
-include LICENSE README.md README-TR.md CHANGELOG.md
-include setup.py pyproject.toml
-include eventflow/_core.c eventflow/_core.pyi eventflow/py.typed
+include LICENSE pyproject.toml run_tests.py
+include setup.py flowevent/_core.c flowevent/_core.pyi
+include README.md README-TR.md CHANGELOG.md
+include flowevent/py.typed
 recursive-include tests *.py *.json
-recursive-include examples *.py
 recursive-include benchmarks *.py
+recursive-include tools *.py
 prune benchmarks/results
-prune .serena
-prune .ruff_cache
-global-exclude *.py[cod] *.so *.pyd *.dll *.dylib
+global-exclude *.py[cod] *.so *.pyd *.dll *.dylib *.gcno *.gcda

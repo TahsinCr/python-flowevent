@@ -1,0 +1,38 @@
+{
+  "purpose": "Reviewed public API contract for flowevent.",
+  "exports": [
+    "AsyncEventQueue",
+    "AsyncEventQueueStats",
+    "EventBus",
+    "EventEngine",
+    "EventQueueClosedError",
+    "QueueOverflowError"
+  ],
+  "signatures": {
+    "AsyncEventQueue": {
+      "$call": "(bus: 'EventBus[T]', *, event_filter: 'EventFilter[T] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[T], bool] | None' = None, routing_key: 'Hashable | None' = None, capacity: 'int' = 128, overflow: \"Literal['drop_oldest', 'drop_newest', 'error']\" = 'error', observer: 'EventQueueObserver | None' = None) -> 'None'",
+      "methods": {
+        "__init__": "(self, bus: 'EventBus[T]', *, event_filter: 'EventFilter[T] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[T], bool] | None' = None, routing_key: 'Hashable | None' = None, capacity: 'int' = 128, overflow: \"Literal['drop_oldest', 'drop_newest', 'error']\" = 'error', observer: 'EventQueueObserver | None' = None) -> 'None'",
+        "receive": "(self) -> 'T'",
+        "aclose": "(self) -> 'None'",
+        "stats": "(self) -> 'AsyncEventQueueStats'"
+      }
+    },
+    "EventBus": {
+      "$call": "(*, history: 'EventHistory[T] | int | None' = None, routing_key: 'Callable[[T], Hashable] | None' = None, error_policy: 'ErrorPolicy' = <ErrorPolicy.ISOLATE: 'isolate'>, executor: 'ThreadPoolExecutor | None' = None, replay_buffer_limit: 'int' = 1000, max_schedules: 'int' = 64, shutdown_timeout: 'float' = 5.0, actions: 'EventBusActions[T] | None' = None, on_before: 'Callable[[T], None] | None' = None, on_after: 'Callable[[T, PublishResult], None] | None' = None, on_error: 'Callable[[EventErrorContext[T]], None] | None' = None, on_timeout: 'Callable[[EventTimeoutContext[T]], None] | None' = None) -> 'None'",
+      "methods": {
+        "subscribe": "(self, callback: 'Callable[[T], None]', *, event_filter: 'EventFilter[T] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[T], bool] | None' = None, routing_key: 'Hashable | None' = None, once: 'bool' = False, times: 'int | None' = None, replay: 'int' = 0) -> 'Subscription'",
+        "once": "(self, callback: 'Callable[[T], None]', *, event_filter: 'EventFilter[T] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[T], bool] | None' = None, routing_key: 'Hashable | None' = None, replay: 'int' = 0) -> 'Subscription'",
+        "wait_for": "(self, *, event_filter: 'EventFilter[T] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[T], bool] | None' = None, routing_key: 'Hashable | None' = None, timeout: 'float | None' = None) -> 'T | None'"
+      }
+    },
+    "EventEngine": {
+      "$call": "(*, history: 'int | None' = None, error_policy: 'ErrorPolicy' = <ErrorPolicy.ISOLATE: 'isolate'>, executor: 'ThreadPoolExecutor | None' = None, actions: 'EventBusActions[Any] | None' = None, on_before: 'Callable[[Any], None] | None' = None, on_after: 'Callable[[Any, PublishResult], None] | None' = None, on_error: 'Callable[[EventErrorContext[Any]], None] | None' = None, on_timeout: 'Callable[[EventTimeoutContext[Any]], None] | None' = None) -> 'None'",
+      "methods": {
+        "subscribe": "(self, channel: 'str', callback: 'Callable[[Any], None]', *, event_filter: 'EventFilter[Any] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[Any], bool] | None' = None, routing_key: 'Hashable | None' = None, once: 'bool' = False, times: 'int | None' = None, replay: 'int' = 0) -> 'Subscription'",
+        "once": "(self, channel: 'str', callback: 'Callable[[Any], None]', *, event_filter: 'EventFilter[Any] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[Any], bool] | None' = None, routing_key: 'Hashable | None' = None, replay: 'int' = 0) -> 'Subscription'",
+        "wait_for": "(self, channel: 'str', *, event_filter: 'EventFilter[Any] | None' = None, event_type: 'EventType | None' = None, predicate: 'Callable[[Any], bool] | None' = None, routing_key: 'Hashable | None' = None, timeout: 'float | None' = None) -> 'Any | None'"
+      }
+    }
+  }
+}

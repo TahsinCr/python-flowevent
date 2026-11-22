@@ -7,9 +7,9 @@ import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from time import perf_counter, process_time
 
-from eventflow import EventBus
-from eventflow.bridges import AsyncEventQueue
-from eventflow.errors import EventQueueClosedError
+from flowevent import EventBus
+from flowevent.bridges import AsyncEventQueue
+from flowevent.errors import EventQueueClosedError
 
 from ._runner import bench_time_func, create_runner, forward_cli_arguments
 
@@ -56,7 +56,7 @@ async def _sample(publishers: int, loops: int) -> tuple[float, float]:
                 await consumer_ready.wait()
                 with ThreadPoolExecutor(
                     max_workers=publishers,
-                    thread_name_prefix="EventFlowPublisherBenchmark",
+                    thread_name_prefix="FlowEventPublisherBenchmark",
                 ) as executor:
                     workers = [executor.submit(publish, index) for index in range(publishers)]
                     start_barrier.wait(timeout=10)

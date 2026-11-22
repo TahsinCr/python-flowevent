@@ -29,10 +29,10 @@ class BenchmarkMetadataTests(unittest.TestCase):
     def test_source_fingerprint_tracks_code_and_ignores_result_files(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            (root / "eventflow").mkdir()
+            (root / "flowevent").mkdir()
             (root / "benchmarks" / "results").mkdir(parents=True)
             (root / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
-            (root / "eventflow" / "__init__.py").write_text("value = 1\n", encoding="utf-8")
+            (root / "flowevent" / "__init__.py").write_text("value = 1\n", encoding="utf-8")
             source = root / "benchmarks" / "benchmark.py"
             source.write_text("value = 1\n", encoding="utf-8")
 
@@ -49,15 +49,15 @@ class BenchmarkMetadataTests(unittest.TestCase):
     def test_source_dirty_flag_ignores_results_and_detects_code_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
-            (root / "eventflow").mkdir()
+            (root / "flowevent").mkdir()
             (root / "benchmarks" / "results").mkdir(parents=True)
             (root / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
-            (root / "eventflow" / "__init__.py").write_text("value = 1\n", encoding="utf-8")
+            (root / "flowevent" / "__init__.py").write_text("value = 1\n", encoding="utf-8")
             source = root / "benchmarks" / "benchmark.py"
             source.write_text("value = 1\n", encoding="utf-8")
             subprocess.run(["git", "init", "-q"], cwd=root, check=True)
             subprocess.run(
-                ["git", "add", "pyproject.toml", "eventflow", "benchmarks"],
+                ["git", "add", "pyproject.toml", "flowevent", "benchmarks"],
                 cwd=root,
                 check=True,
             )
@@ -91,10 +91,10 @@ class BenchmarkMetadataTests(unittest.TestCase):
     def test_metadata_records_backend_gil_and_source_identity(self) -> None:
         metadata = benchmark_metadata(REPOSITORY_ROOT)
 
-        self.assertEqual(metadata["eventflow_implementation"], "python")
-        self.assertIn(metadata["eventflow_gil"], {"enabled", "disabled", "unavailable"})
-        self.assertIn(metadata["eventflow_source_dirty"], {"true", "false", "unknown"})
-        self.assertRegex(metadata["eventflow_source_sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(metadata["flowevent_implementation"], "python")
+        self.assertIn(metadata["flowevent_gil"], {"enabled", "disabled", "unavailable"})
+        self.assertIn(metadata["flowevent_source_dirty"], {"true", "false", "unknown"})
+        self.assertRegex(metadata["flowevent_source_sha256"], r"^[0-9a-f]{64}$")
 
 
 @unittest.skipUnless(importlib.util.find_spec("pyperf"), "pyperf development extra is required")
@@ -164,61 +164,25 @@ class PyperfRunnerTests(unittest.TestCase):
         names = {item["metadata"]["name"] for item in benchmarks}
         self.assertEqual(names, {"sync-smoke-custom-2-3-red-blue", "async-smoke"})
         metadata = document["metadata"]
-        self.assertEqual(metadata["eventflow_implementation"], "python")
-        self.assertIn(metadata["eventflow_gil"], {"enabled", "disabled", "unavailable"})
-        self.assertRegex(metadata["eventflow_source_sha256"], r"^[0-9a-f]{64}$")
+        self.assertEqual(metadata["flowevent_implementation"], "python")
+        self.assertIn(metadata["flowevent_gil"], {"enabled", "disabled", "unavailable"})
+        self.assertRegex(metadata["flowevent_source_sha256"], r"^[0-9a-f]{64}$")
 
-    def test_async_pipeline_benchmarks_create_pipeline_in_each_worker_loop(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            output = Path(temporary_directory) / "pipeline.json"
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "benchmarks.benchmark_pipeline",
-                    "--processes=1",
-                    "--values=2",
-                    "--warmups=1",
-                    "--loops=1",
-                    "--output",
-                    str(output),
-                ],
-                cwd=REPOSITORY_ROOT,
-                check=False,
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-            if result.returncode:
-                self.fail(
-                    f"pipeline benchmark failed\nstdout:\n{result.stdout}\nstderr:\n{result.stderr}"
-                )
-            document = json.loads(output.read_text(encoding="utf-8"))
-
-        names = {item["metadata"]["name"] for item in document["benchmarks"]}
-        self.assertEqual(len(names), 21)
-        self.assertIn("async/20/middleware", names)
-
-    def test_component_replay_and_publication_benchmarks_launch(self) -> None:
+    def test_project_benchmarks_launch(self) -> None:
         cases = {
-            "benchmark_components": {
-                "cache/hit",
-                "state-machine/compare-and-transition",
-                "policy/evaluate-rules-16",
-                "operation-stats/record",
-            },
-            "benchmark_resilience": {
-                "retry/sync-one-retry",
-                "retry/async-one-retry",
-                "circuit-breaker/sync-success",
+            "benchmark_context": {
+                "event-envelope/create",
+                "context/correlation-bind-read-reset",
             },
             "benchmark_lifecycle": {
                 "callback/predicate-hooks-invoke",
-                "resource-scope/defer-close",
-                "bounded-work-pool/submit-result",
-                "single-flight/same-key-eight-waiters",
+                "subscription-scope/add-close",
             },
-            "benchmark_publish": {"sync-engine/0", "async-engine/0", "async/type-miss/64"},
+            "benchmark_publish": {
+                "sync-engine/0",
+                "async-engine/0",
+                "async/type-miss/64",
+            },
             "benchmark_replay": {
                 "history/query-type/32/last",
                 "sync-bus/replay-filter/all-match/32/replay-1",

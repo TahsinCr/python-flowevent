@@ -6,12 +6,12 @@ from unittest.mock import patch
 
 from _support import _reject_task_creation
 
-from eventflow import CallbackSubscription, CallbackTimeoutError
+from flowevent import CallbackSubscription, CallbackTimeoutError
 
 
 class CallbackTests(unittest.TestCase):
     def test_hook_failures_do_not_skip_hooks_or_hide_callback_failure(self):
-        from eventflow._compatibility import ExceptionGroup
+        from flowevent._compatibility import ExceptionGroup
 
         calls = []
 
@@ -171,7 +171,7 @@ class AsyncCallbackTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(cancellations, 2)
 
     async def test_async_success_and_after_errors_are_preserved(self):
-        from eventflow._compatibility import ExceptionGroup
+        from flowevent._compatibility import ExceptionGroup
 
         calls = []
 

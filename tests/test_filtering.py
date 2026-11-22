@@ -4,8 +4,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from eventflow.filtering import EventFilter
-from eventflow.stream import AsyncStream
+from flowevent.filtering import EventFilter
 
 
 class EventFilterTests(unittest.TestCase):
@@ -13,7 +12,7 @@ class EventFilterTests(unittest.TestCase):
         isawaitable = Mock()
         event_filter = EventFilter(predicate=lambda event: event > 0)
         with patch(
-            "eventflow.filtering.inspect",
+            "flowevent.filtering.inspect",
             SimpleNamespace(isawaitable=isawaitable),
         ):
             self.assertTrue(event_filter.matches(1))
@@ -24,24 +23,3 @@ class EventFilterTests(unittest.TestCase):
             event_filter = EventFilter(predicate=lambda _event: result)
             with self.subTest(result=result), self.assertRaisesRegex(TypeError, "return bool"):
                 event_filter.matches(1)
-
-
-class StreamFilterTests(unittest.IsolatedAsyncioTestCase):
-    async def test_sync_predicate_must_return_bool(self) -> None:
-        async def source():
-            yield 1
-
-        stream = AsyncStream(source()).filter(lambda _event: "true")  # type: ignore[arg-type]
-        with self.assertRaisesRegex(TypeError, "return bool"):
-            await stream.__anext__()
-
-    async def test_async_predicate_must_return_bool(self) -> None:
-        async def source():
-            yield 1
-
-        async def predicate(_event: int) -> bool:
-            return "false"  # type: ignore[return-value]
-
-        stream = AsyncStream(source()).filter(predicate)
-        with self.assertRaisesRegex(TypeError, "return bool"):
-            await stream.__anext__()

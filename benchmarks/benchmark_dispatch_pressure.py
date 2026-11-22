@@ -17,7 +17,7 @@ from threading import Event
 from time import perf_counter, perf_counter_ns, process_time_ns
 from typing import Any
 
-from eventflow import EventBus
+from flowevent import EventBus
 
 from ._runner import (
     bench_sync,

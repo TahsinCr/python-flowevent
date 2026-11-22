@@ -15,8 +15,8 @@ from hypothesis.stateful import (
     rule,
 )
 
-from eventflow import ErrorPolicy, EventBus, EventFilter, MemoryEventHistory, Subscription
-from eventflow._compatibility import ExceptionGroup
+from flowevent import ErrorPolicy, EventBus, EventFilter, MemoryEventHistory, Subscription
+from flowevent._compatibility import ExceptionGroup
 
 
 @dataclass

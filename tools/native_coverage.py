@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-COPY_DIRECTORIES = ("eventflow", "tests", "examples", "benchmarks", "docs")
+COPY_DIRECTORIES = ("flowevent", "tests", "benchmarks")
 COPY_FILES = (
     "setup.py",
     "pyproject.toml",
@@ -22,7 +22,6 @@ COPY_FILES = (
     "README.md",
     "README-TR.md",
     "LICENSE",
-    "CHANGELOG.md",
 )
 IGNORE = shutil.ignore_patterns(
     ".git",
@@ -110,10 +109,10 @@ def _copy_source(destination: Path) -> None:
 def _coverage_summary(path: Path) -> dict[str, int | float | str]:
     report = json.loads(path.read_text(encoding="utf-8"))
     files = report.get("files", [])
-    matching = [item for item in files if item.get("filename") == "eventflow/_core.c"]
+    matching = [item for item in files if item.get("filename") == "flowevent/_core.c"]
     if len(matching) != 1 or len(files) != 1:
         raise RuntimeError(
-            "Coverage must contain exactly eventflow/_core.c; "
+            "Coverage must contain exactly flowevent/_core.c; "
             f"reported files: {[item.get('filename') for item in files]}"
         )
 
@@ -138,7 +137,7 @@ def _coverage_summary(path: Path) -> dict[str, int | float | str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Build an isolated GCC-instrumented EventFlow C extension and report C coverage."
+        description="Build an isolated GCC-instrumented FlowEvent C extension and report C coverage."
     )
     parser.add_argument(
         "--output-dir",
@@ -152,8 +151,8 @@ def main() -> int:
         parser.error("Native C coverage currently requires Linux and GCC/gcov.")
     if sysconfig.get_config_var("Py_GIL_DISABLED"):
         parser.error("Use a regular GIL-enabled CPython build for gcov coverage.")
-    if not callable(getattr(sys, "_is_gil_enabled", None)) or not sys._is_gil_enabled():
-        parser.error("The coverage interpreter must report that the GIL is enabled.")
+    if not getattr(sys, "_is_gil_enabled", lambda: True)():
+        parser.error("The coverage interpreter must run with the GIL enabled.")
 
     gcc = shutil.which("gcc")
     gcov = shutil.which("gcov")
@@ -184,7 +183,7 @@ def main() -> int:
     for path in (report_path, summary_path):
         path.unlink(missing_ok=True)
 
-    with tempfile.TemporaryDirectory(prefix="eventflow-native-coverage-") as temp:
+    with tempfile.TemporaryDirectory(prefix="flowevent-native-coverage-") as temp:
         project = Path(temp) / "source"
         project.mkdir()
         _copy_source(project)
@@ -194,6 +193,7 @@ def main() -> int:
             env.pop(name, None)
         env.update(
             {
+                "EVENTFLOW_REQUIRE_NATIVE": "1",
                 "CC": gcc,
                 "CFLAGS": "--coverage -O0 -g",
                 "LDFLAGS": "--coverage",
@@ -213,13 +213,13 @@ def main() -> int:
             [
                 sys.executable,
                 "-c",
-                "import json, sys; from pathlib import Path; import eventflow; "
-                "from eventflow import _native; "
+                "import json, sys; from pathlib import Path; import flowevent; "
+                "from flowevent import _native; "
                 "assert _native.CORE is not None, 'native extension did not load'; "
                 "module = Path(_native.CORE.__file__).resolve(); "
                 "assert module.is_relative_to(Path.cwd()), module; "
-                "print(json.dumps({'version': eventflow.__version__, 'core': str(module), "
-                "'gil_enabled': sys._is_gil_enabled()}))",
+                "print(json.dumps({'version': flowevent.__version__, 'core': str(module), "
+                "'gil_enabled': getattr(sys, '_is_gil_enabled', lambda: True)()}))",
             ],
             cwd=project,
             env=env,
@@ -253,7 +253,7 @@ def main() -> int:
                 "--gcov-executable",
                 gcov,
                 "--filter",
-                r"eventflow/_core\.c$",
+                r"flowevent/_core\.c$",
                 "--json",
                 str(report_path),
                 "--json-summary",
@@ -268,12 +268,12 @@ def main() -> int:
         )
 
         totals = _coverage_summary(summary_path)
-        source_digest = hashlib.sha256((ROOT / "eventflow" / "_core.c").read_bytes()).hexdigest()
+        source_digest = hashlib.sha256((ROOT / "flowevent" / "_core.c").read_bytes()).hexdigest()
         status = _git_value("status", "--porcelain", "--untracked-files=normal")
         metadata = {
             "git_revision": _git_value("rev-parse", "HEAD"),
-            "git_dirty": bool(status),
-            "eventflow_version": runtime["version"],
+            "git_dirty": None if status is None else bool(status),
+            "flowevent_version": runtime["version"],
             "core_module": runtime["core"],
             "python": sys.version,
             "platform": platform.platform(),
@@ -293,7 +293,7 @@ def main() -> int:
         )
 
         lines = [
-            "# EventFlow native C coverage",
+            "# FlowEvent native C coverage",
             "",
             f"Source SHA-256: `{source_digest}`",
             f"Revision: `{metadata['git_revision'] or 'unavailable'}` "
@@ -309,7 +309,7 @@ def main() -> int:
             f"| Branches | {totals['branch_covered']} | {totals['branch_total']} | {totals['branch_percent']}% |",
             "",
             f"Instrumented test run: `{len(gcno_files)}` compiler-note and `{len(gcda_files)}` runtime-data files.",
-            "The JSON report is restricted to `eventflow/_core.c`; empty reports fail this command.",
+            "The JSON report is restricted to `flowevent/_core.c`; empty reports fail this command.",
         ]
         (output_dir / "native-coverage.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 

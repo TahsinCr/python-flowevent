@@ -4,7 +4,7 @@ import unittest
 from collections import deque
 from random import Random
 
-from eventflow import EventBus, EventBusClosedError
+from flowevent import EventBus, EventBusClosedError
 
 
 class EventModelTests(unittest.TestCase):

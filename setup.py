@@ -14,10 +14,10 @@ if pure_python not in {"0", "1"}:
 if pure_python == "0":
     extensions.append(
         Extension(
-            "eventflow._core",
-            sources=["eventflow/_core.c"],
+            "flowevent._core",
+            sources=["flowevent/_core.c"],
             extra_compile_args=[] if sys.platform == "win32" else ["-Wall", "-Wextra"],
-            optional=True,
+            optional=os.environ.get("EVENTFLOW_REQUIRE_NATIVE") != "1",
         )
     )
 

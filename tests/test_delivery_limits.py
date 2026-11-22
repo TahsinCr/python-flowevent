@@ -3,8 +3,8 @@ from __future__ import annotations
 import asyncio
 import unittest
 
-from eventflow import AsyncEventBus, AsyncEventEngine, DeliveryMode, ErrorPolicy
-from eventflow._compatibility import ExceptionGroup
+from flowevent import AsyncEventBus, AsyncEventEngine, DeliveryMode, ErrorPolicy
+from flowevent._compatibility import ExceptionGroup
 
 
 class AsyncDeliveryLimitTests(unittest.IsolatedAsyncioTestCase):

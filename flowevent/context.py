@@ -13,7 +13,7 @@ from typing import Any, Generic, TypeVar
 from uuid import uuid4
 
 T = TypeVar("T")
-_correlation: ContextVar[str | None] = ContextVar("eventflow_correlation", default=None)
+_correlation: ContextVar[str | None] = ContextVar("flowevent_correlation", default=None)
 _EMPTY_MAPPING_PROXY: Mapping[str, object] = MappingProxyType({})
 __all__ = ["EventEnvelope", "correlation_context", "current_correlation_id"]
 

@@ -13,8 +13,8 @@ from time import perf_counter_ns
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import eventflow.event_bus as bus_module
-from eventflow import AsyncEventBus, EventBus, MemoryEventHistory
+import flowevent.event_bus as bus_module
+from flowevent import AsyncEventBus, EventBus, MemoryEventHistory
 
 from ._runner import benchmark_metadata
 from ._support import ignore_event, ignore_event_async, positive_int

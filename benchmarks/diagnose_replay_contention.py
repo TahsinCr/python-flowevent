@@ -13,7 +13,7 @@ from sys import getsizeof
 from threading import Barrier
 from time import perf_counter_ns
 
-from eventflow import EventBus, EventFilter, MemoryEventHistory
+from flowevent import EventBus, EventFilter, MemoryEventHistory
 
 from ._runner import benchmark_metadata
 from ._support import ignore_event, positive_int

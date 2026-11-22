@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from _support import _reject_task_creation
 
-from eventflow._lifecycle import finish_cleanup
+from flowevent._lifecycle import finish_cleanup
 
 
 class FinishCleanupTests(unittest.IsolatedAsyncioTestCase):

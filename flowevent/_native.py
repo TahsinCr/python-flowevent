@@ -1,4 +1,4 @@
-"""Private loader for the optional compiled EventFlow C extension."""
+"""Private loader for the optional compiled FlowEvent C extension."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def _load_core() -> Any:
     except ImportError:
         return None
     if gil_was_disabled and gil_check is not None and gil_check():
-        raise RuntimeError("importing eventflow._core enabled the free-threaded GIL")
+        raise RuntimeError("importing flowevent._core enabled the free-threaded GIL")
     return module
 
 

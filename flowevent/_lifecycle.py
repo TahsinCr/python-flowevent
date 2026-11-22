@@ -46,23 +46,6 @@ def bind_running_loop(
     return loop
 
 
-def request_task_cancellation(task: asyncio.Task[T], loop: asyncio.AbstractEventLoop) -> bool:
-    """Request cancellation on the task's loop; return false when it cannot be queued."""
-    if task.done():
-        return False
-    try:
-        running = asyncio.get_running_loop()
-    except RuntimeError:
-        running = None
-    if running is loop:
-        return task.cancel()
-    try:
-        loop.call_soon_threadsafe(task.cancel)
-    except RuntimeError:
-        return False
-    return True
-
-
 def raise_cleanup_errors(
     errors: list[BaseException],
     *,

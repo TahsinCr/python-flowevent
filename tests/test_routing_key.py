@@ -6,8 +6,8 @@ import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
-from eventflow import AsyncEventQueue, EventBus, EventFilter, QueueOverflowError
-from eventflow.engine import EventEngine
+from flowevent import AsyncEventQueue, EventBus, EventFilter, QueueOverflowError
+from flowevent.engine import EventEngine
 
 
 class EventBusRoutingTests(unittest.TestCase):
@@ -292,7 +292,7 @@ class EventBusRoutingTests(unittest.TestCase):
 
 
 class AsyncEventQueueRoutingTests(unittest.IsolatedAsyncioTestCase):
-    async def test_eventflow_filters_run_before_bounded_queue(self) -> None:
+    async def test_flowevent_filters_run_before_bounded_queue(self) -> None:
         bus = EventBus[tuple[str, int]](routing_key=lambda event: event[0])
         queue = AsyncEventQueue(
             bus,

@@ -1,4 +1,4 @@
-"""Shared pyperf runner and source metadata for EventFlow benchmarks."""
+"""Shared pyperf runner and source metadata for FlowEvent benchmarks."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def _is_source_path(relative: bytes | str) -> bool:
     if not path.parts or (path.parts[0] == "benchmarks" and "results" in path.parts):
         return False
     return (
-        path.parts[0] == "eventflow"
+        path.parts[0] == "flowevent"
         and (path.suffix in {".py", ".c", ".pyi"} or path.name == "py.typed")
     ) or (path.parts[0] == "benchmarks" and path.suffix == ".py")
 
@@ -101,7 +101,7 @@ def source_provenance(root: Path | None = None) -> SourceProvenance:
         pass
 
     source_files = [root / "pyproject.toml"]
-    for directory in (root / "eventflow", root / "benchmarks"):
+    for directory in (root / "flowevent", root / "benchmarks"):
         if directory.is_dir():
             source_files.extend(
                 path
@@ -133,19 +133,19 @@ def benchmark_metadata(root: Path | None = None) -> dict[str, str]:
     gil_check = getattr(sys, "_is_gil_enabled", None)
     gil_enabled = "unavailable" if gil_check is None else ("enabled" if gil_check() else "disabled")
     source = source_provenance(root)
-    from eventflow import _native
+    from flowevent import _native
 
     return {
-        "eventflow_implementation": "python",
-        "eventflow_core": "c" if _native.CORE is not None else "python",
-        "eventflow_gil": gil_enabled,
-        "eventflow_revision": source["revision"] or "unknown",
-        "eventflow_source_dirty": (
+        "flowevent_implementation": "python",
+        "flowevent_core": "c" if _native.CORE is not None else "python",
+        "flowevent_gil": gil_enabled,
+        "flowevent_revision": source["revision"] or "unknown",
+        "flowevent_source_dirty": (
             "unknown"
             if source["source_dirty"] is None
             else ("true" if source["source_dirty"] else "false")
         ),
-        "eventflow_source_sha256": source["source_sha256"] or "unknown",
+        "flowevent_source_sha256": source["source_sha256"] or "unknown",
     }
 
 

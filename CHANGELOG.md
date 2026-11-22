@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Use `flowevent` as the Python import name and keep `flowevent` as the distribution name.
+- Focus FlowEvent on in-process event delivery. Pipeline, coordination, and state APIs now live in FlowPipeline, FlowCoord, and FlowState.
+- Use `TahsinCr/python-flowevent` as the repository address and verify packages against the renamed namespace.
+
+### Removed
+
+- Remove the cache, service registry, and policy evaluator APIs.
+
 ### Fixed
 
 - Restrict wheel verification to distribution artifacts so diagnostic logs from other jobs cannot block a tagged release.

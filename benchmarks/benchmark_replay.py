@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from time import perf_counter
 
-from eventflow import AsyncEventBus, EventBus, EventFilter, MemoryEventHistory
+from flowevent import AsyncEventBus, EventBus, EventFilter, MemoryEventHistory
 
 from ._runner import bench_sync, bench_time_func, create_runner, forward_cli_arguments
 from ._support import ignore_event, ignore_event_async

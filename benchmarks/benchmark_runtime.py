@@ -10,7 +10,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from time import perf_counter
 
-from eventflow import AsyncEventBus, DeliveryMode, EventBus
+from flowevent import AsyncEventBus, DeliveryMode, EventBus
 
 from ._runner import bench_time_func, create_runner, forward_cli_arguments
 from ._support import ignore_event, positive_int, yield_once_async

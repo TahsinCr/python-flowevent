@@ -4,7 +4,7 @@ import asyncio
 import threading
 import unittest
 
-from eventflow.subscription import AsyncSubscription, Subscription
+from flowevent.subscription import AsyncSubscription, Subscription
 
 
 class SubscriptionTests(unittest.TestCase):

@@ -7,8 +7,8 @@ from __future__ import annotations
 import asyncio
 from time import perf_counter
 
-from eventflow import AsyncEventBus, DeliveryMode, ErrorPolicy, EventBus
-from eventflow.engine import AsyncEventEngine, EventEngine
+from flowevent import AsyncEventBus, DeliveryMode, ErrorPolicy, EventBus
+from flowevent.engine import AsyncEventEngine, EventEngine
 
 from ._runner import bench_sync, bench_time_func, create_runner
 from ._support import ignore_event, ignore_event_async, yield_once_async

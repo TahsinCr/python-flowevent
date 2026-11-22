@@ -62,23 +62,6 @@ class BusCore:
     def stats(self) -> Any: ...
     def publish(self, bus: Any, event: Any) -> Any: ...
 
-class OperationStatsCore:
-    def __init__(self, max_operations: int = ...) -> None: ...
-    def record(
-        self,
-        name: str,
-        status: str,
-        elapsed: float,
-        queue_depth: int | None,
-        dropped: int,
-        retries: int,
-        rejected: int,
-        timeouts: int,
-        shutdown_seconds: float,
-    ) -> None: ...
-    def snapshot(self) -> Any: ...
-    def reset(self) -> None: ...
-
 def configure(
     publish_result: type[Any],
     stats_cls: type[Any],
@@ -89,9 +72,4 @@ def configure(
     exception_group: type[BaseException],
     is_awaitable_fn: Callable[[object], bool],
     close_awaitable_fn: Callable[[object], None],
-) -> None: ...
-def configure_observability(
-    operation_metrics: type[Any],
-    operation_stats_snapshot: type[Any],
-    mapping_proxy: type[Any],
 ) -> None: ...

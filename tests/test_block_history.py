@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 from weakref import ref
 
-from eventflow import EventBus, EventFilter, MemoryEventHistory
+from flowevent import EventBus, EventFilter, MemoryEventHistory
 
 
 class BlockHistoryTests(unittest.TestCase):

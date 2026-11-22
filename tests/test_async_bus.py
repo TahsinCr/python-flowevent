@@ -14,7 +14,7 @@ from _support import (
     _reject_task_creation,
 )
 
-from eventflow import (
+from flowevent import (
     AsyncEventBus,
     AsyncEventBusActions,
     AsyncEventEngine,
@@ -29,7 +29,7 @@ from eventflow import (
     MemoryEventHistory,
     PublishResult,
 )
-from eventflow._compatibility import ExceptionGroup
+from flowevent._compatibility import ExceptionGroup
 
 
 class AsyncEventBusTests(unittest.IsolatedAsyncioTestCase):
@@ -75,7 +75,7 @@ class AsyncEventBusTests(unittest.IsolatedAsyncioTestCase):
             await bus.publish(7)
             self.assertFalse(once.active)
             self.assertEqual(received[-3:], ["last", "first", "last"])
-            with patch("eventflow.async_event_bus._could_match_type", side_effect=MemoryError):
+            with patch("flowevent.async_event_bus._could_match_type", side_effect=MemoryError):
                 handle = await bus.subscribe(first, event_type=int)
             await bus.publish(8)
             self.assertTrue(handle.active)
@@ -135,7 +135,7 @@ class AsyncEventBusTests(unittest.IsolatedAsyncioTestCase):
             for _ in range(64):
                 await bus.subscribe(receive, event_type=int)
             await bus.publish(1)
-            with patch("eventflow.async_event_bus._could_match_type", side_effect=MemoryError):
+            with patch("flowevent.async_event_bus._could_match_type", side_effect=MemoryError):
                 result = await bus.publish(2)
             self.assertEqual((result.matched, result.delivered, result.failed), (64, 64, 0))
             self.assertEqual(bus.query(), (1, 2))
