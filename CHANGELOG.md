@@ -13,6 +13,7 @@ All notable changes to this project are documented in this file.
 ### Removed
 
 - Remove the cache, service registry, and policy evaluator APIs.
+- Remove standalone example scripts and keep executable usage snippets in the READMEs.
 
 ### Fixed
 
