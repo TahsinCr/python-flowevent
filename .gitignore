@@ -1,21 +1,29 @@
+# Python environments, caches, and distributions
 .venv/
 __pycache__/
 *.py[cod]
-*.so
-
 .pytest_cache/
-.coverage
-htmlcov/
+.hypothesis/
 .mypy_cache/
 .ruff_cache/
-
+.coverage
+.coverage.*
+htmlcov/
 build/
 dist/
 *.egg-info/
 
-.serena/*
-.serena/memories/*
+# Local development tools
+.serena/
 .idea/
 .vscode/
 *.swp
 *~
+
+# Locally built native extensions and profiling data
+*.so
+*.pyd
+*.dll
+*.dylib
+*.gcno
+*.gcda
