@@ -21,7 +21,7 @@ This guide covers installing `flowevent`, why naive Python observer lists fail i
 
 ## Installation
 
-`flowevent` requires **Python 3.10 or newer** with zero runtime dependencies. Prebuilt wheels for major OS/CPU combinations bundle the optional compiled `flowevent._core` extension automatically; environments without a C compiler fall back seamlessly to pure Python.
+`flowevent` requires **Python 3.10 or newer**. Python 3.10 installs the `backports.strenum` and `exceptiongroup` libraries. There are no runtime dependencies on Python 3.11 and later. The optional C extension comes with supported platform wheels. If there is no suitable wheel, installing from source can fall back to pure Python.
 
 ```bash
 # Install from PyPI
@@ -53,7 +53,7 @@ def publish(event):
 
 Under concurrent or real application workloads, five subtle bugs quickly appear:
 
-1. **Mutation during iteration:** Unsubscribing inside a callback (`once`) raises `RuntimeError: list changed during iteration` or skips adjacent subscribers.
+1. **Mutation during iteration:** Removing a subscription while iterating over a Python list can silently skip the next handler.
 2. **Concurrent `once` race conditions:** Two threads calling `publish()` concurrently can invoke a "once-only" callback twice.
 3. **One exception breaks everyone:** A single failing subscriber aborts delivery to remaining healthy subscribers or obscures who failed.
 4. **History replay gaps (`replay` races):** Subscribing with "send last 10 events, then live events" easily drops or duplicates events arriving between the history read and live registration.

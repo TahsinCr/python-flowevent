@@ -12,16 +12,16 @@ Bu rehber `flowevent` kurulumunu, çıplak Python callback listelerinin üretimd
 - [Problem: Basit Bir Observer Listesi Neden Yetmez?](#problem-basit-bir-observer-listesi-neden-yetmez)
 - [Mimari Tercihler ("Neden Böyle Tasarlandı?")](#mimari-tercihler-neden-böyle-tasarlandı)
   - [Senkron ve `asyncio` Dünyalarını Ayrı Tutmak](#senkron-ve-asyncio-dünyalarını-ayrı-tutmak)
-  - [Süreç İçi (`in-process`) Sınırları](#süreç-içi-in-process-sınırları)
+  - [Süreç İçi (`in-process`) Sınırları](#süreç-i%CC%87çi-in-process-sınırları)
   - [Seçici C Çekirdeği ve Saf Python Simetrisi](#seçici-c-çekirdeği-ve-saf-python-simetrisi)
-- [İlk Senkron Örnek ve `PublishResult`](#ilk-senkron-örnek-ve-publishresult)
-- [İlk Asenkron Örnek](#ilk-asenkron-örnek)
+- [İlk Senkron Örnek ve `PublishResult`](#i%CC%87lk-senkron-örnek-ve-publishresult)
+- [İlk Asenkron Örnek](#i%CC%87lk-asenkron-örnek)
 
 ---
 
 ## Kurulum
 
-`flowevent` **Python 3.10 veya üzeri** gerektirir ve çalışma zamanı bağımlılığı yoktur. Desteklenen işletim sistemleri ve CPU mimarileri için önceden derlenmiş wheel'ler C çekirdeğini (`flowevent._core`) otomatik içerir; C derleyicisi olmayan ortamlarda ise saf Python olarak sorunsuz çalışır.
+`flowevent` **Python 3.10 veya üzeri** gerektirir. Python 3.10’da `backports.strenum` ve `exceptiongroup` kurulur. Python 3.11 ve üstünde çalışma zamanı bağımlılığı yoktur. Desteklenen platformların wheel paketleri isteğe bağlı C uzantısını içerir. Uygun wheel yoksa kaynak koddan kurulum saf Python uygulamasına dönebilir.
 
 ```bash
 # PyPI üzerinden kurulum
@@ -50,7 +50,7 @@ def publish(event):
 
 Gerçek uygulamada büyüdükçe 5 sorun arka arkaya patlar:
 
-1. **Dağıtım sırasında abonelik değişimi:** Bir callback çalışırken kendi aboneliğini (`once`) veya başka bir aboneliği iptal ederse `RuntimeError: list changed during iteration` veya atlanan aboneler oluşur.
+1. **Dağıtım sırasında abonelik değişimi:** Bir Python listesi üzerinde gezinirken aboneliği kaldırmak sıradaki işleyicinin sessizce atlanmasına yol açabilir.
 2. **Eşzamanlı `once` yarış durumu (race condition):** İki thread aynı anda `publish()` çağırdığında "yalnızca 1 kez çalışması gereken" abone iki kez tetiklenebilir.
 3. **Yavaş veya hatalı bir abone herkesi bozar:** Bir işleyici istisna fırlattığında sonraki aboneler hiç çalışmaz ya da hangi hatanın kime ait olduğu kaybolur.
 4. **Geç gelen abonenin kaçırdığı olaylar (`replay` boşluğu):** "Son 10 olayı ver, sonra canlıya geç" derken geçmişi okuma ile canlıya abone olma arasındaki milisaniyede gelen yeni olaylar ya kaçar ya da çift işlenir.

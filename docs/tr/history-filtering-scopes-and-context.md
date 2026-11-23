@@ -21,8 +21,8 @@ Bu rehber sınırlı olay geçmişini (`MemoryEventHistory` ve `replay`), filtre
 
 Bir `EventBus` veya `AsyncEventBus` kurarken `history=100` verebilir veya özelleştirilmiş `MemoryEventHistory(capacity=100_000, block_size=256)` ya da kendi `EventHistory` alt sınıfını geçebilirsin:
 
-- **`block_size` ne işe yarar?** Standart halka tampon (`deque(maxlen=capacity)`) yüksek replay trafiğinde tüm geçmişin anlık kopyasını alırken `O(N)` bellek kopyalar. `block_size` tanımlandığında geçmiş sabit mühürlü demet blokları (`_Blocks`) halinde tutulur; anlık snapshot alınırken yalnızca iki uçtaki kısmi bloklar kopyalanır.
-- `bus.latest(...)` en güncel eşleşen olayı, `bus.query(..., limit=N)` sondan en fazla `N` eşleşen olayı yayın sırasıyla (`oldest -> newest`) döndürür. Sınırlı sorgular geçmişi sondan geriye taradığı için tüm geçmişi kopyalamaz.
+- **`block_size` ne işe yarar?** Geçmiş değiştikten sonra deque’in tam görüntüsü `O(N)` öğe kopyalayabilir. `block_size` ile tamamlanan bloklar paylaşılır ve filtreli yeniden oynatmada öğe kopyaları azalır. Sık ekleme yapılan iş yüklerinde varsayılan deque uygundur.
+- `bus.latest(...)` en yeni eşleşmeyi verir. `bus.query(..., limit=N)` son `N` eşleşmeye kadar sonucu kronolojik sırayla döndürür. Filtreye ve depolama biçimine bağlı olarak geçmişi tarayabilir veya bir görüntüsünü alabilir.
 
 [Yukarı dön](#konu-dizini)
 
@@ -34,7 +34,7 @@ Bir `EventBus` veya `AsyncEventBus` kurarken `history=100` verebilir veya özell
 
 1. Abone geçici olarak `replaying` modunda kaydedilir ve o anki geçmiş snapshot'ı çekilir.
 2. `cb` geçmişteki son 5 eşleşen olayı alırken **aynı anda başka bir thread/task tarafından yayımlanan yeni olaylar** abonenin özel `replay_buffer`'ına (`replay_buffer_limit`, varsayılan `1_000`) sıralı olarak biriktirilir.
-3. Geçmiş oynatma biter bitmez tampon boşaltılır ve abone kusursuz sırayla canlı yayına geçer. Tampon dolarsa `BufferError` yükselir ve yarım kalan abonelik temizlenip dışarı sızdırılmaz.
+3. Doğrudan dağıtım başlamadan önce tamponlanan olaylar işlenir. Tampon dolarsa taşmaya neden olan yayın, hata politikasına göre `BufferError` bildirir ve yeniden oynatılan abonelik iptal edilir.
 
 Not: `AsyncEventBus` tarafında çok büyük replay işlemlerinde event loop'u tek seferde kilitlememek için `replay_scan_batch_size` parametresi ile periyodik `await asyncio.sleep(0)` nefes alma noktaları bırakılabilir.
 
@@ -83,7 +83,7 @@ assert seen == [2, 20]
 
 ## `CallbackSubscription` ile Hız Sınırı, Timeout ve Hook'lar
 
-Doğrudan bus üzerinde `frequency_hz`, `timeout` veya tek bir aboneye özel `on_before` / `on_success` / `on_error` / `on_timeout` / `on_after` yaşam döngüsü hook'larına ihtiyaç duyduğunda callback'ini `CallbackSubscription` ile sarıp bus'a verebilirsin:
+Frekans sınırını, zaman aşımını ve hook’ları uygulamak için `CallbackSubscription.invoke` ya da `await CallbackSubscription.invoke_async` kullan. Sarmalayıcıyı doğrudan çağırmak özgün callback’i çalıştırır ve bu politikaları uygulamaz. Senkron zaman aşımı callback döndükten sonra bildirilir. Asenkron iptal için callback’in işbirliği gerekir.
 
 - `frequency_hz`: Belirtilen frekanstan daha sık gelen olayları sessizce atlar (`throttle`).
 - `timeout`: Süre bütçesi takibi yapar; senkron veya async çağrının süresini aşması durumunda `on_timeout` hook'unu tetikler (`CallbackTimeoutError` bütçe kontrolü; Python'daki bloklayan C/senkron kodları zorla kesmek için arka planda yetim thread bırakmaz).

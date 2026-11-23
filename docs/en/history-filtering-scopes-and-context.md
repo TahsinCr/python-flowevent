@@ -21,8 +21,8 @@ This guide explains bounded history (`MemoryEventHistory` and blocked snapshots)
 
 Pass `history=100`, a configured `MemoryEventHistory(capacity=100_000, block_size=256)`, or your own thread-safe `EventHistory` implementation to either bus:
 
-- **Why `block_size`?** Plain ring buffers (`deque(maxlen=capacity)`) must copy up to `O(N)` items on every replay snapshot. With `block_size` set, completed blocks are stored as immutable tuples (`_Blocks`) so snapshots only copy the mutable head and tail edges.
-- `bus.latest(...)` fetches the newest match cleanly, while `bus.query(..., limit=N)` scans backward for bounded limits without copying the entire history deque, returning results in chronological (`oldest -> newest`) order.
+- **Why `block_size`?** A full deque snapshot may copy up to `O(N)` items after history changes. Sealed blocks can be shared, reducing item copies for filtered replay. The default deque is a good fit for append-heavy workloads.
+- `bus.latest(...)` returns the newest match. `bus.query(..., limit=N)` returns up to the latest `N` matches in chronological order. Depending on the filter and storage, it can still scan or snapshot history.
 
 [Back to top](#table-of-contents)
 
@@ -34,7 +34,7 @@ When calling `bus.subscribe(cb, replay=5)`, `flowevent` prevents both missed and
 
 1. Registers the subscriber in a `replaying` state and captures the history snapshot.
 2. Live publishes occurring while historical items are being replayed append into the subscriber's private replay buffer (bounded by `replay_buffer_limit`, default `1_000`).
-3. Once historical replay completes, buffered live events flush in order before transitioning seamlessly to direct live delivery. Exceeding `replay_buffer_limit` raises `BufferError` and cleans up the partial subscription without leaking.
+3. Buffered events are delivered before direct delivery resumes. If the buffer fills, the overflowing publish reports a `BufferError` through its error policy and the replaying subscription is cancelled.
 
 Note: On `AsyncEventBus`, set `replay_scan_batch_size` to yield control (`await asyncio.sleep(0)`) periodically when scanning huge histories so other tasks are not starved.
 
@@ -80,7 +80,7 @@ assert seen == [2, 20]
 
 ## `CallbackSubscription` for Throttling, Timeouts, and Hooks
 
-Wrap handlers with `CallbackSubscription` when you need per-subscriber rate throttling (`frequency_hz`), timing budgets (`timeout`, triggering `on_timeout`), dynamic `enable()` / `disable()`, or per-subscriber `on_before` / `on_success` / `on_error` / `on_timeout` / `on_after` decorators. (Timeout tracking checks elapsed time budgets cleanly without spawning abandoned threads to forcibly kill uncooperative C/blocking functions.)
+Use `CallbackSubscription.invoke` or `await CallbackSubscription.invoke_async` to apply rate limits, timeouts and hooks. Calling the wrapper directly invokes the original callback without those policies. A synchronous timeout is reported after the callback returns. Async cancellation requires cooperation from the callback.
 
 [Back to top](#table-of-contents)
 

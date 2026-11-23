@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Correct the bilingual guides for event delivery errors, async methods, and replay behavior.
+
 ## [v2.0.0] - 2026-11-23
 
 ### Changed

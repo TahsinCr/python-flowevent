@@ -30,7 +30,7 @@ This guide covers coroutine dispatch via `AsyncEventBus`, named channel coordina
 | `DeliveryMode.SEQUENTIAL` *(default)* | Awaits matching handlers one after another in registration order without spawning tasks. | Ordered delivery, low overhead, predictable execution. |
 | `DeliveryMode.CONCURRENT` | Runs matching handlers concurrently. | Handlers perform independent network or I/O awaits. |
 
-**Why `max_concurrency` matters:** Under `DeliveryMode.CONCURRENT` with `max_concurrency=None`, publishing to 500 matching subscribers can spawn 500 concurrent tasks at once. Setting `max_concurrency=16` bounds concurrent executions cleanly via an internal semaphore.
+**Why `max_concurrency` matters:** Without a limit, concurrent delivery can spawn one task per matching subscriber. Setting `max_concurrency=16` keeps at most 16 delivery tasks active for each publish. Separate publish calls have separate limits.
 
 ```python
 import asyncio
@@ -61,7 +61,7 @@ asyncio.run(main())
 
 ### Publishing from Threads via `publish_threadsafe()`
 
-To publish a single event from a worker thread onto an `AsyncEventBus`, call `future = bus.publish_threadsafe(event)` to obtain a `concurrent.futures.Future[PublishResult]`. For sustained high-rate streams from threads to asyncio, prefer **`AsyncEventQueue`** below.
+From a worker thread, call `bus.publish_threadsafe(event)` to get a `concurrent.futures.Future[PublishResult]`. First use the bus on its owning event loop and keep that loop running. Wait on the future from the worker thread, since blocking on it in the event-loop thread prevents delivery. For sustained streams, consider `AsyncEventQueue`.
 
 [Back to top](#table-of-contents)
 
@@ -71,7 +71,7 @@ To publish a single event from a worker thread onto an `AsyncEventBus`, call `fu
 
 Rather than mixing unrelated domain events on one bus, `EventEngine` and `AsyncEventEngine` manage separate buses under readable channel names (`"orders"`, `"telemetry"`, `"audit"`):
 
-- `engine.subscribe("orders", handler)` creates the `"orders"` channel automatically with engine defaults if missing.
+- Subscribing with `engine.subscribe("orders", handler)` (or awaiting it on the async engine) creates the channel with engine defaults if it is missing.
 - To customize a channel (e.g., attaching a `routing_key` extractor or custom `EventHistory`), instantiate an `EventBus` and register it with `engine.add("orders", bus)`. One open bus cannot belong to two live engines simultaneously.
 - `engine.stop()` / `await engine.close()` closes all registered channels; if any channel fails to close, it stays tracked for retry.
 
@@ -110,7 +110,7 @@ When the queue reaches `capacity` (default `128`), `overflow` controls what happ
 
 | Policy | Behavior | Typical Use |
 | --- | --- | --- |
-| `"error"` *(default)* | Rejects the new event and raises `QueueOverflowError` to the publisher. | Critical streams where silent drops are unacceptable. |
+| `"error"` *(default)* | Rejects the new item. The bus reports a `QueueOverflowError` in `PublishResult.errors` under `ISOLATE`, or in an `ExceptionGroup` under `RAISE`. | Streams where the publisher must detect overflow. |
 | `"drop_oldest"` | Evicts the oldest queued item to admit the newest (`dropped` increments). | Telemetry or UI state where freshest state wins. |
 | `"drop_newest"` | Discards the incoming event (`dropped` increments). | FIFO streams where older entries have priority. |
 

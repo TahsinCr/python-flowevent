@@ -4,6 +4,8 @@
 
 Complete reference for every public class, constructor, method, dataclass, enum, and exception exported by `flowevent` (`v2.0.0`).
 
+The installed package exposes its version as `flowevent.__version__`.
+
 ---
 
 ## Table of Contents
@@ -73,8 +75,8 @@ Subclasses `BaseEventBus[T]`.
 - `async subscribe(callback, *, event_filter=None, event_type=None, predicate=None, once=False, times=None, replay=0) -> AsyncSubscription`
 - `async once(...) -> AsyncSubscription`
 - `async wait_for(..., timeout=None) -> T | None`
-- `publish_every(event: T, interval: float, *, times: int | None = None, immediately: bool = True) -> AsyncSubscription`
-- `latest(...)`, `query(..., limit=None)`, `clear()`, `async close()` (`async with` support), `delivery_mode`, `stats`, `subscriber_count`, `closed`
+- `async publish_every(event: T, interval: float, *, times: int | None = None, immediately: bool = True) -> AsyncSubscription`
+- `latest(...)`, `query(..., limit=None)`, `async clear()`, `async close()` (`async with` support), `delivery_mode`, `stats`, `subscriber_count`, `closed`
 
 [Back to top](#table-of-contents)
 
@@ -86,7 +88,7 @@ Named-channel registry (`running`, `channel_names -> tuple[str, ...]`).
 
 - `EventEngine(*, history=None, error_policy=..., executor=None, actions=None, on_before=..., on_after=..., on_error=..., on_timeout=...)`
 - `AsyncEventEngine(*, history=None, error_policy=..., delivery_mode=..., max_concurrency=None, actions=None, on_before=..., on_after=..., on_error=..., on_timeout=...)`
-- Methods: `channel(name)`, `add(name, bus)`, `remove(name) -> bool`, `subscribe(channel, cb, ...)`, `once(channel, cb, ...)`, `publish(channel, event)`, `wait_for(channel, ...)`, `publish_every(channel, ...)`, `start()`, `stop()` / `close()` (`remove`, `subscribe`, `once`, `publish`, `wait_for`, `stop`, `close` are coroutines on `AsyncEventEngine`).
+- Methods: `channel(name)`, `add(name, bus)`, `remove(name) -> bool`, `subscribe(channel, cb, ...)`, `once(channel, cb, ...)`, `publish(channel, event)`, `wait_for(channel, ...)`, `publish_every(channel, ...)`, `start()`, `stop()` / `close()` (`remove`, `subscribe`, `once`, `publish`, `wait_for`, `publish_every`, `start`, `stop`, `close` are coroutines on `AsyncEventEngine`).
 
 [Back to top](#table-of-contents)
 

@@ -11,7 +11,7 @@ Bu rehber coroutine işleyiciler için `AsyncEventBus`, modüler kanal yönetimi
 - [`AsyncEventBus` ve Tek-Loop Sahipliği](#asynceventbus-ve-tek-loop-sahipliği)
   - [`DeliveryMode.SEQUENTIAL` vs `DeliveryMode.CONCURRENT` ve `max_concurrency`](#deliverymodesequential-vs-deliverymodeconcurrent-ve-max_concurrency)
   - [`publish_threadsafe()` ile Thread'den Yayın](#publish_threadsafe-ile-threadden-yayın)
-- [`EventEngine` ve `AsyncEventEngine` ile İsimli Kanallar](#eventengine-ve-asynceventengine-ile-isimli-kanallar)
+- [`EventEngine` ve `AsyncEventEngine` ile İsimli Kanallar](#eventengine-ve-asynceventengine-ile-i%CC%87simli-kanallar)
 - [`AsyncEventQueue`: Thread ↔ Asyncio Köprüsü](#asynceventqueue-thread--asyncio-köprüsü)
   - [Geri Basınç (`overflow`) Politikaları](#geri-basınç-overflow-politikaları)
   - [Erken Filtreleme ve `EventQueueObserver`](#erken-filtreleme-ve-eventqueueobserver)
@@ -30,7 +30,7 @@ Bu rehber coroutine işleyiciler için `AsyncEventBus`, modüler kanal yönetimi
 | `DeliveryMode.SEQUENTIAL` *(varsayılan)* | Eşleşen aboneleri kayıt sırasıyla arka arkaya `await` eder; yeni task oluşturmaz. | Sıralı tutarlılık, düşük overhead ve öngörülebilir yürütme istendiğinde. |
 | `DeliveryMode.CONCURRENT` | Eşleşen aboneleri aynı anda yürütür. | Aboneler ağ/DB gibi bağımsız I/O beklemeleri yapıyorsa. |
 
-**Neden `max_concurrency` önemlidir?** `DeliveryMode.CONCURRENT` seçerken `max_concurrency=None` bırakırsan, 500 abonenin eşleştiği tek bir `publish()` aynı anda 500 task yaratabilir. `max_concurrency=16` gibi bir üst sınır vererek eşzamanlı yürütmeyi dahili `Semaphore` ile sınırlayabilirsin.
+**Neden `max_concurrency` önemlidir?** Sınır verilmezse eşleşen her abone için bir görev oluşturulabilir. `max_concurrency=16`, her yayının aynı anda en fazla 16 dağıtım görevi çalıştırmasını sağlar. Ayrı yayın çağrılarının sınırları birbirinden bağımsızdır.
 
 ```python
 import asyncio
@@ -61,7 +61,7 @@ asyncio.run(main())
 
 ### `publish_threadsafe()` ile Thread'den Yayın
 
-Bir arka plan thread'inden `AsyncEventBus`'a olay göndermen gerekiyorsa `loop.call_soon_threadsafe` ile tek tek sarmalamak yerine doğrudan `future = bus.publish_threadsafe(event)` çağırabilirsin; dönüşte `concurrent.futures.Future[PublishResult]` alırsın. (Yüksek hacimli sürekli akış içinse bunun yerine aşağıda açıklanan `AsyncEventQueue` tercih edilmelidir.)
+Arka plan thread’inden `bus.publish_threadsafe(event)` çağrısı bir `concurrent.futures.Future[PublishResult]` döndürür. Önce bus’ı kendi event loop’unda kullan ve döngüyü çalışır durumda tut. Sonucu arka plan thread’inde bekle. Event loop’un çalıştığı thread’i bloke etmek dağıtımı engeller. Sürekli akışlar için `AsyncEventQueue` kullanabilirsin.
 
 [Yukarı dön](#konu-dizini)
 
@@ -110,7 +110,7 @@ Kuyruk `capacity` (varsayılan `128`) sınırına ulaştığında ne olacağın�
 
 | Politika | Davranış | Kullanım Senaryosu |
 | --- | --- | --- |
-| `"error"` *(varsayılan)* | Yeni olayı reddeder ve yayıncıya `QueueOverflowError` fırlatır. | Hiçbir olayın sessizce düşmemesi gereken kritik akışlar. |
+| `"error"` *(varsayılan)* | Yeni öğeyi reddeder. Bus, `ISOLATE` politikasında `QueueOverflowError` hatasını `PublishResult.errors` içinde, `RAISE` politikasında ise `ExceptionGroup` içinde bildirir. | Yayıncının taşmayı algılaması gereken akışlar. |
 | `"drop_oldest"` | En eski bekleyen olayı çıkarıp yenisini ekler (`dropped` artar). | Telemetri / UI durumu gibi "en taze veri önemli" akışlar. |
 | `"drop_newest"` | Yeni gelen olayı atar, kuyruktakileri korur (`dropped` artar). | İlk gelen sıranın korunması gereken kuyruklar. |
 

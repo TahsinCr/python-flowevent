@@ -24,14 +24,14 @@ Calling `bus.publish(event)` executes in a well-defined sequence:
 
 ```mermaid
 flowchart LR
-    Pub["publish(event)"] --> Before["on_before hook"]
-    Before --> Hist["history.append(event)\n(if configured)"]
-    Hist --> Snap["Capture subscriber snapshot\n(using routing_key index)"]
-    Snap --> Deliver["Filter & invoke OUTSIDE lock\n(sequential or via executor)"]
-    Deliver --> Stats["Update stats + on_after / on_error"]
+    Pub["publish(event)"] --> Snap["Capture subscriber snapshot"]
+    Snap --> Hist["Record history and count publish"]
+    Hist --> Before["on_before hook"]
+    Before --> Deliver["Filter and invoke outside the bus lock"]
+    Deliver --> Stats["Report errors, run on_after, and update delivery totals"]
 ```
 
-**Lock-free delivery invocation:** Subscribers are executed *outside* the bus `RLock`. As a result, calling `subscription.cancel()` or nested `bus.publish(...)` from inside a handler will not deadlock, while snapshots keep subscriber sets consistent.
+**Lock-free delivery invocation:** Subscribers are executed *outside* the bus `RLock`. A handler can cancel its subscription or publish another event without holding the bus lock. Code inside a handler still needs to account for its own locks and blocking calls.
 
 [Back to top](#table-of-contents)
 
@@ -83,7 +83,7 @@ Note: Using `routing_key` on `subscribe()`, `once()`, or `wait_for()` requires a
 | Policy | Behavior |
 | --- | --- |
 | `ErrorPolicy.ISOLATE` *(default)* | All remaining subscribers still run even if one fails. Exceptions are collected in `PublishResult.errors` and passed to `on_error`. |
-| `ErrorPolicy.RAISE` | All subscribers still run and `on_error` still fires, then `publish()` raises the sole exception directly or an `ExceptionGroup("Event dispatch failed", errors)` for multiple failures. |
+| `ErrorPolicy.RAISE` | Delivery continues for other selected subscribers. If errors were collected, `publish()` raises an `ExceptionGroup`, even for a single failure. |
 
 Provide `EventBusActions` (or direct `on_before`, `on_after`, `on_error`, `on_timeout` kwargs—never both) for cross-cutting hooks. An `on_before` failure is captured into errors without aborting subscriber dispatch. All `EventBus` hooks must be **synchronous**.
 

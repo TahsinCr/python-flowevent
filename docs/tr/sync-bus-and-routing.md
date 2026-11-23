@@ -24,14 +24,14 @@ Bu rehber senkron `EventBus` sınıfının iş parçacığı güvenliğini (thre
 
 ```mermaid
 flowchart LR
-    Pub["publish(event)"] --> Before["on_before hook"]
-    Before --> Hist["history.append(event)\n(varsa)"]
-    Hist --> Snap["Abone snapshot al\n(routing_key indeksi)"]
-    Snap --> Deliver["Kilit DIŞINDA filtrele ve teslim et\n(sırayla veya executor ile)"]
-    Deliver --> Stats["stats + on_after / on_error"]
+    Pub["publish(event)"] --> Snap["Abone listesinin görüntüsünü al"]
+    Snap --> Hist["Geçmişi ve yayın sayacını güncelle"]
+    Hist --> Before["on_before hook"]
+    Before --> Deliver["Bus kilidi dışında filtrele ve dağıt"]
+    Deliver --> Stats["Hataları bildir, on_after çalıştır ve dağıtım sayaçlarını güncelle"]
 ```
 
-**Kritik tasarım tercihi (Kilit dışında teslimat):** Callback'ler bus kilidi **tutulmadan** çalıştırılır. Böylece bir abone kendi içinden `subscription.cancel()` veya `bus.publish(...)` çağırdığında deadlock yaşanmaz; abonelik snapshot'ı tutarlı kalır.
+**Kritik tasarım tercihi (Kilit dışında teslimat):** Callback'ler bus kilidi **tutulmadan** çalıştırılır. İşleyici bus kilidini tutmadan `subscription.cancel()` veya `bus.publish(...)` çağırabilir. İşleyicinin kendi kilitleri ve bloklayan çağrıları ayrıca değerlendirilmelidir.
 
 [Yukarı dön](#konu-dizini)
 
@@ -83,7 +83,7 @@ Not: Aboneliklerde `routing_key` kullanmak için `EventBus` kurucusunda `routing
 | Politika | Davranış |
 | --- | --- |
 | `ErrorPolicy.ISOLATE` *(varsayılan)* | Bir abonede hata olsa bile kalan abonelerin tamamı çalıştırılır. Hatalar toplanıp `PublishResult.errors` içinde döndürülür ve varsa `on_error` hook'una verilir. |
-| `ErrorPolicy.RAISE` | Hatalar yine sonraki aboneleri engellemeden toplanır (ve `on_error` tetiklenir), ancak `publish()` sonunda tek hata varsa doğrudan kendisi, birden fazla hata varsa `ExceptionGroup("Event dispatch failed", errors)` yükseltilir. |
+| `ErrorPolicy.RAISE` | Seçilen diğer abonelere dağıtım sürer. Hata toplandıysa `publish()`, tek hata olsa bile bir `ExceptionGroup` yükseltir. |
 
 `EventBusActions` (veya doğrudan kurucudaki `on_before`, `on_after`, `on_error`, `on_timeout` parametreleri) tüm yayınlara ortak gözlem veya yan etki bağlamayı sağlar. `on_before` içinde hata çıkarsa o yayın iptal edilmez, diğer adımlar çalışır ve hata toplanır. Tüm hook'lar **senkron** olmalıdır.
 

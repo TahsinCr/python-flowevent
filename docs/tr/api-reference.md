@@ -4,6 +4,8 @@
 
 Bu sayfa `flowevent` (`v2.0.0`) paketinden dışa aktarılan tüm public sınıfları, metot imzalarını, veri tiplerini, enum'ları ve istisna hiyerarşisini özetler.
 
+Kurulu paketin sürümüne `flowevent.__version__` ile erişebilirsin.
+
 ---
 
 ## Konu Dizini
@@ -73,8 +75,8 @@ Bu sayfa `flowevent` (`v2.0.0`) paketinden dışa aktarılan tüm public sınıf
 - `async subscribe(callback, *, event_filter=None, event_type=None, predicate=None, once=False, times=None, replay=0) -> AsyncSubscription`
 - `async once(...) -> AsyncSubscription`
 - `async wait_for(..., timeout=None) -> T | None`
-- `publish_every(event: T, interval: float, *, times: int | None = None, immediately: bool = True) -> AsyncSubscription`
-- `latest(...)`, `query(..., limit=None)`, `clear()`, `async close()` (`async with` desteği), `delivery_mode`, `stats`, `subscriber_count`, `closed`
+- `async publish_every(event: T, interval: float, *, times: int | None = None, immediately: bool = True) -> AsyncSubscription`
+- `latest(...)`, `query(..., limit=None)`, `async clear()`, `async close()` (`async with` desteği), `delivery_mode`, `stats`, `subscriber_count`, `closed`
 
 [Yukarı dön](#konu-dizini)
 
@@ -86,7 +88,7 @@ Bu sayfa `flowevent` (`v2.0.0`) paketinden dışa aktarılan tüm public sınıf
 
 - `EventEngine(*, history=None, error_policy=..., executor=None, actions=None, on_before=..., on_after=..., on_error=..., on_timeout=...)`
 - `AsyncEventEngine(*, history=None, error_policy=..., delivery_mode=..., max_concurrency=None, actions=None, on_before=..., on_after=..., on_error=..., on_timeout=...)`
-- Ortak metotlar: `channel(name)`, `add(name, bus)`, `remove(name) -> bool`, `subscribe(channel, cb, ...)`, `once(channel, cb, ...)`, `publish(channel, event)`, `wait_for(channel, ...)`, `publish_every(channel, ...)`, `start()`, `stop()` / `close()` (`async` versiyonda `remove`, `subscribe`, `once`, `publish`, `wait_for`, `stop`, `close` coroutine'dir).
+- Ortak metotlar: `channel(name)`, `add(name, bus)`, `remove(name) -> bool`, `subscribe(channel, cb, ...)`, `once(channel, cb, ...)`, `publish(channel, event)`, `wait_for(channel, ...)`, `publish_every(channel, ...)`, `start()`, `stop()` / `close()` (`async` versiyonda `remove`, `subscribe`, `once`, `publish`, `wait_for`, `publish_every`, `start`, `stop`, `close` coroutine'dir).
 
 [Yukarı dön](#konu-dizini)
 
