@@ -11,6 +11,8 @@
 
 Python uygulamaları ve kütüphaneleri için süreç içi olay dağıtımı. Tipli olayları senkron veya asenkron bir bus üzerinden yayımlayıp abonelikleri yönetebilirsiniz.
 
+> [Türkçe belgeler](docs/tr/README.md) mimari tercihleri, yönlendirmeyi, köprüleri, replay tamponlamayı, C çekirdeğini ve API başvurusunu kapsar. [English documentation](docs/en/README.md) bağlantısı da mevcuttur.
+
 FlowEvent, [Vehicle Autonomy Core][vehicle-autonomy-core] projesinin olay dağıtım bileşeninden doğdu.
 
 ## İçindekiler

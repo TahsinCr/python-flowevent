@@ -11,6 +11,8 @@
 
 In-process event delivery for Python applications and libraries. Use a synchronous or async bus to publish typed events and manage subscriptions without a message broker.
 
+> [English documentation](docs/en/README.md) covers architecture choices, indexed routing, bridges, replay buffering, the C extension, and the API reference. Also available in [Türkçe](docs/tr/README.md).
+
 FlowEvent began as the event subsystem of [Vehicle Autonomy Core][vehicle-autonomy-core].
 
 ## Contents
