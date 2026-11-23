@@ -6,13 +6,15 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Document how to limit per-publish concurrency when using concurrent async delivery.
+
 - Use `flowevent` as the Python import name and keep `flowevent` as the distribution name.
-- Focus FlowEvent on in-process event delivery. Pipeline, coordination, and state APIs now live in FlowPipeline, FlowCoord, and FlowState.
+- Focus FlowEvent on in-process event delivery. After [v1.4.2](https://github.com/TahsinCr/python-flowevent/releases/tag/v1.4.2), extract pipeline and stream APIs into [FlowPipeline](https://github.com/TahsinCr/python-flowpipeline) and execution coordination into [FlowCoord](https://github.com/TahsinCr/python-flowcoord).
 - Use `TahsinCr/python-flowevent` as the repository address and verify packages against the renamed namespace.
 
 ### Removed
 
-- Remove the cache, service registry, and policy evaluator APIs.
+- Remove the state machine, versioned values, cache, service registry, and policy evaluator APIs from FlowEvent.
 - Remove standalone example scripts and keep executable usage snippets in the READMEs.
 
 ### Fixed

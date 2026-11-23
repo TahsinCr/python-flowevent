@@ -1,12 +1,12 @@
-[![Yayımlanan sürüm: v1.4.2][version-shield]][changelog]
+[![CI durumu][ci-shield]][ci]
+[![PyPI sürümü][pypi-shield]][pypi]
 [![Python 3.10+][python-shield]][python]
 [![MIT Lisansı][license-shield]][license]
-
 [English][readme-en] | **Türkçe**
 
 # FlowEvent
 
-[Depo][repository] · [Değişiklik günlüğü][changelog] · [Son sürüm][releases] · [MIT Lisansı][license]
+[Repository][repository] · [Changelog][changelog] · [Latest release][releases] · [MIT License][license]
 
 Python uygulamaları ve kütüphaneleri için süreç içi olay dağıtımı. Tipli olayları senkron veya asenkron bir bus üzerinden yayımlayıp abonelikleri yönetebilirsiniz.
 
@@ -30,10 +30,8 @@ FlowEvent, [Vehicle Autonomy Core][vehicle-autonomy-core] projesinin olay dağı
 Proje kökünde Python 3.10 veya üzeriyle kurun.
 
 ~~~sh
-python -m pip install .
+python -m pip install flowevent
 ~~~
-
-PyPI’daki 1.x sürümleri `python -m pip install flowevent` ile kurulur ve `eventflow` olarak içe aktarılır. Bu kaynak ağacındaki yeni import adı `flowevent`.
 
 ### İlk olayınızı yayımlayın
 
@@ -95,6 +93,8 @@ assert received == [("orders", "created"), ("orders", "packed")]
 
 İşleyiciler asenkron çalışıyorsa `AsyncEventBus` kullanın. Bus’ı ve aboneliklerini aynı asyncio event loop’unda kullanın.
 
+`DeliveryMode.CONCURRENT` seçtiğinizde her yayının aynı anda kaç işleyici çalıştıracağını `max_concurrency` ile sınırlayın. Bu sınır verilmezse bir yayın, eşleşen her işleyici için ayrı bir görev oluşturabilir.
+
 ~~~python
 import asyncio
 
@@ -139,11 +139,14 @@ Proje [MIT Lisansı][license] ile yayımlanır.
 
 ## Diğer projeler
 
-[FlowCoord][repo-flowcoord] · [FlowPipeline][repo-flowpipeline] · [FlowState][repo-flowstate]
+[FlowCoord][repo-flowcoord] · [FlowPipeline][repo-flowpipeline]
 
-[version-shield]: https://img.shields.io/badge/version-v1.4.2-b7a3e3.svg?style=for-the-badge
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/TahsinCr/python-flowevent/ci.yml?branch=main&event=push&label=CI&style=for-the-badge&logo=github&logoColor=white
+[pypi-shield]: https://img.shields.io/pypi/v/flowevent?label=PyPI&style=for-the-badge&logo=pypi&logoColor=white
 [python-shield]: https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white
 [license-shield]: https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge
+[ci]: https://github.com/TahsinCr/python-flowevent/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush
+[pypi]: https://pypi.org/project/flowevent/
 [python]: https://www.python.org/downloads/
 [readme-en]: https://github.com/TahsinCr/python-flowevent/blob/main/README.md
 [repository]: https://github.com/TahsinCr/python-flowevent
@@ -151,7 +154,6 @@ Proje [MIT Lisansı][license] ile yayımlanır.
 [license]: https://github.com/TahsinCr/python-flowevent/blob/main/LICENSE
 [repo-flowcoord]: https://github.com/TahsinCr/python-flowcoord
 [repo-flowpipeline]: https://github.com/TahsinCr/python-flowpipeline
-[repo-flowstate]: https://github.com/TahsinCr/python-flowstate
 [releases]: https://github.com/TahsinCr/python-flowevent/releases/latest
 [benchmarks]: https://github.com/TahsinCr/python-flowevent/blob/main/benchmarks/results/README.md
 [vehicle-autonomy-core]: https://github.com/TahsinCr/vehicle-autonomy-core

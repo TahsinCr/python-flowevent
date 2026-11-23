@@ -1,7 +1,7 @@
-[![Published version: v1.4.2][version-shield]][changelog]
+[![CI status][ci-shield]][ci]
+[![PyPI version][pypi-shield]][pypi]
 [![Python 3.10+][python-shield]][python]
 [![MIT License][license-shield]][license]
-
 **English** | [Türkçe][readme-tr]
 
 # FlowEvent
@@ -30,10 +30,8 @@ FlowEvent began as the event subsystem of [Vehicle Autonomy Core][vehicle-autono
 Install from the project root with Python 3.10 or later.
 
 ~~~sh
-python -m pip install .
+python -m pip install flowevent
 ~~~
-
-To install the published 1.x release, use `python -m pip install flowevent` and import `eventflow`. This checkout uses the new `flowevent` import.
 
 ### Publish your first event
 
@@ -95,6 +93,8 @@ assert received == [("orders", "created"), ("orders", "packed")]
 
 Use `AsyncEventBus` when handlers already perform async work. Keep the bus and its subscriptions on the event loop that owns them.
 
+If you opt into `DeliveryMode.CONCURRENT`, set `max_concurrency` to bound the number of handlers run concurrently by each publish. Without that limit, a publish can create a task for every matching handler.
+
 ~~~python
 import asyncio
 
@@ -139,11 +139,14 @@ This project is licensed under the [MIT License][license].
 
 ## Related projects
 
-[FlowCoord][repo-flowcoord] · [FlowPipeline][repo-flowpipeline] · [FlowState][repo-flowstate]
+[FlowCoord][repo-flowcoord] · [FlowPipeline][repo-flowpipeline]
 
-[version-shield]: https://img.shields.io/badge/version-v1.4.2-b7a3e3.svg?style=for-the-badge
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/TahsinCr/python-flowevent/ci.yml?branch=main&event=push&label=CI&style=for-the-badge&logo=github&logoColor=white
+[pypi-shield]: https://img.shields.io/pypi/v/flowevent?label=PyPI&style=for-the-badge&logo=pypi&logoColor=white
 [python-shield]: https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?style=for-the-badge&logo=python&logoColor=white
 [license-shield]: https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge
+[ci]: https://github.com/TahsinCr/python-flowevent/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush
+[pypi]: https://pypi.org/project/flowevent/
 [python]: https://www.python.org/downloads/
 [readme-tr]: https://github.com/TahsinCr/python-flowevent/blob/main/README-TR.md
 [repository]: https://github.com/TahsinCr/python-flowevent
@@ -151,7 +154,6 @@ This project is licensed under the [MIT License][license].
 [license]: https://github.com/TahsinCr/python-flowevent/blob/main/LICENSE
 [repo-flowcoord]: https://github.com/TahsinCr/python-flowcoord
 [repo-flowpipeline]: https://github.com/TahsinCr/python-flowpipeline
-[repo-flowstate]: https://github.com/TahsinCr/python-flowstate
 [releases]: https://github.com/TahsinCr/python-flowevent/releases/latest
 [benchmarks]: https://github.com/TahsinCr/python-flowevent/blob/main/benchmarks/results/README.md
 [vehicle-autonomy-core]: https://github.com/TahsinCr/vehicle-autonomy-core
