@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import threading
 from collections import deque
 from collections.abc import AsyncIterator, Callable, Hashable
@@ -19,10 +20,14 @@ from .subscription import Subscription
 
 T = TypeVar("T")
 __all__ = ["AsyncEventQueue", "AsyncEventQueueStats", "EventQueueObserver"]
+_logger = logging.getLogger(__name__)
 
 
 class EventQueueObserver(Protocol):
-    """Synchronous operation recorder for queue activity, called outside its lock."""
+    """Synchronous recorder called outside the queue lock.
+
+    Recorder exceptions are logged separately from event delivery.
+    """
 
     def record(
         self,
@@ -134,15 +139,13 @@ class AsyncEventQueue(Generic[T]):
             loop_thread_id = self._loop_thread_id
             depth = len(self._events)
         try:
-            if self._observer is not None:
-                synchronous_result(
-                    self._observer.record(
-                        "event_queue.publish",
-                        status="error" if overflow_error else "success",
-                        dropped=dropped,
-                        rejected=int(overflow_error),
-                        queue_depth=depth,
-                    )
+            if (observer := self._observer) is not None:
+                self._record(
+                    observer,
+                    "event_queue.publish",
+                    depth,
+                    dropped=dropped,
+                    rejected=int(overflow_error),
                 )
         finally:
             if accepted and waiter is not None and loop is not None:
@@ -156,8 +159,32 @@ class AsyncEventQueue(Generic[T]):
                     pass
         if overflow_error:
             raise QueueOverflowError("AsyncEventQueue capacity is full")
-        if dropped and self._overflow == "drop_newest":
-            return
+
+    @staticmethod
+    def _record(
+        observer: EventQueueObserver,
+        operation: str,
+        depth: int,
+        *,
+        dropped: int = 0,
+        rejected: int = 0,
+    ) -> None:
+        try:
+            synchronous_result(
+                observer.record(
+                    operation,
+                    status="error" if rejected else "success",
+                    dropped=dropped,
+                    rejected=rejected,
+                    queue_depth=depth,
+                )
+            )
+        except Exception:
+            try:
+                _logger.exception("Event queue observer failed for %s", operation)
+            except Exception:
+                # A failing application log handler must not change delivery either.
+                pass
 
     @staticmethod
     def _wake(waiter: asyncio.Future[None]) -> None:
@@ -192,8 +219,8 @@ class AsyncEventQueue(Generic[T]):
                     if self._waiter is waiter:
                         self._waiter = None
                 raise
-        if self._observer is not None:
-            synchronous_result(self._observer.record("event_queue.receive", queue_depth=depth))
+        if (observer := self._observer) is not None:
+            self._record(observer, "event_queue.receive", depth)
         return event
 
     def __aiter__(self) -> AsyncIterator[T]:

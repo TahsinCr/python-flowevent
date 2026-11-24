@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Keep queue observer exceptions separate from event delivery and overflow errors.
 - Correct the bilingual guides for event delivery errors, async methods, and replay behavior.
 
 ## [v2.0.0] - 2026-11-23

@@ -8,7 +8,6 @@ import unittest
 from unittest.mock import patch
 
 from flowevent import ErrorPolicy, EventBus
-from flowevent._compatibility import ExceptionGroup
 from flowevent.bridges import AsyncEventQueue
 from flowevent.errors import EventQueueClosedError
 
@@ -28,8 +27,8 @@ class EventQueueBridgeTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0)
 
         try:
-            with self.assertRaises(ExceptionGroup):
-                bus.publish(7)
+            with self.assertLogs("flowevent.bridges", level="ERROR"):
+                self.assertTrue(bus.publish(7).successful)
             self.assertEqual(await asyncio.wait_for(consumer, timeout=1), 7)
         finally:
             await queue.aclose()

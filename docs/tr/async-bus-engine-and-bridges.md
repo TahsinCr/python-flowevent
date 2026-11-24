@@ -118,6 +118,8 @@ Kuyruk `capacity` (varsayılan `128`) sınırına ulaştığında ne olacağın�
 
 `AsyncEventQueue(bus, event_type=..., predicate=..., routing_key=...)` doğrudan abonelik seviyesinde filtre uygular; böylece **ilgisiz olaylar bounded kuyruk kapasitesini tüketmeden** elenir. `observer` vererek `event_queue.publish` ve `event_queue.receive` adımında kuyruk derinliği (`queue_depth`) ve düşen olay sayacı (`dropped`, `rejected`) izlenebilir.
 
+Gözlemci istisnaları `flowevent.bridges` üzerinden loglanır. Olay kabulü, teslimatı ve taşma politikası uygulanmaya devam eder.
+
 ```python
 import asyncio
 import threading

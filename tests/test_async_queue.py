@@ -14,6 +14,24 @@ from flowevent.errors import EventQueueClosedError, QueueOverflowError
 
 
 class AsyncQueueTests(unittest.IsolatedAsyncioTestCase):
+    async def test_observer_failures_preserve_delivery_and_overflow(self):
+        class Observer:
+            def record(self, name, **kwargs):
+                raise OSError(name)
+
+        with EventBus[int]() as bus:
+            async with AsyncEventQueue(bus, capacity=1, observer=Observer()) as queue:
+                with self.assertLogs("flowevent.bridges", level="ERROR") as log:
+                    accepted = bus.publish(1)
+                    overflow = bus.publish(2)
+                    event = await queue.receive()
+                self.assertTrue(accepted.successful)
+                self.assertIsInstance(overflow.errors[0], QueueOverflowError)
+                self.assertEqual(event, 1)
+                self.assertEqual(queue.stats().received, 1)
+                self.assertEqual(queue.stats().overflow_errors, 1)
+                self.assertEqual(len(log.records), 3)
+
     async def test_async_event_queue_is_bounded_thread_safe_and_drains_on_close(self):
         bus = EventBus[int]()
         queue = AsyncEventQueue(bus, capacity=2, overflow="drop_oldest")

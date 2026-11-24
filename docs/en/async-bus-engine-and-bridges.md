@@ -118,6 +118,8 @@ When the queue reaches `capacity` (default `128`), `overflow` controls what happ
 
 `AsyncEventQueue(bus, event_type=..., predicate=..., routing_key=...)` filters events **at subscription time** so rejected events never consume bounded queue slots. Attach an `observer` implementing `EventQueueObserver.record(...)` to observe `queue_depth`, `dropped`, and `rejected` outside the queue lock.
 
+Observer exceptions are logged through `flowevent.bridges`. They leave acceptance, delivery and the overflow policy intact.
+
 ```python
 import asyncio
 import threading
