@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Exercise the three installed packages together in CI.
+
 ### Fixed
 
 - Keep queue observer exceptions separate from event delivery and overflow errors.
